@@ -1,0 +1,746 @@
+void solution2 (char *strSource, char *strFrom, char *strTo, char *strParam)
+{
+    char strTemp[1024];
+    char *s = (char*)strSource;
+    int i=0;
+    int iLenFrom = strlen (strFrom);
+    int iLenTo   = strlen (strTo  );
+ 
+    while (*s)
+    {
+        if (strncmp (s, strFrom, iLenFrom) == 0)
+        {
+            strncpy (&(strTemp[i]), strTo, iLenTo);
+            i += iLenTo;
+            s += iLenFrom;
+        }
+        else
+        {
+            strTemp[i++] = *s;
+          s++;
+        }
+    }
+    strTemp[i] = 0;
+ 
+    lr_save_string (strTemp, strParam);
+}
+
+Action()
+{
+	  	int count = 0;
+char *tmp;
+char *tmp2;
+char txt[100];
+char txt1[100];
+int i =0;
+int j =0;
+char txt2[100];
+int lan = 0;
+int s = 0;
+char mid;
+
+	web_set_sockets_option("SSL_VERSION", "AUTO");
+
+
+	web_add_header("Sec-Fetch-Mode", 
+		"navigate");
+
+	web_add_header("Sec-Fetch-Dest", 
+		"document");
+
+	web_add_header("Sec-Fetch-User", 
+		"?1");
+
+	web_add_header("Upgrade-Insecure-Requests", 
+		"1");
+lr_start_transaction("UC02_T1_passport_page");
+
+	
+web_reg_save_param_attrib(
+		"ParamName=csrf_token",
+		"TagName=input",
+		"Extract=value",
+		"Name=csrf_token",
+		"Type=hidden",
+		SEARCH_FILTERS,
+		"IgnoreRedirections=No",
+			LAST);
+	
+
+	
+	web_reg_save_param_ex(
+    "ParamName=process_uuid", 
+    "LB/IC=\;process_uuid=",
+    "RB/IC=\"",
+//    "Ordinal=1",
+	LAST);
+	
+	web_reg_save_param_ex(
+    "ParamName=initTimestamp", 
+    "LB/IC=\"initTimestamp\":",
+    "RB/IC=}",
+	LAST);
+	web_url("{prefics}.{mailSecondPartFrom}", 
+		"URL={host}://{prefics}.{mailSecondPartFrom}/", 
+		"Resource=0", 
+		"RecContentType=text/html", 
+		"Referer=", 
+		"Snapshot=t3.inf", 
+		"Mode=HTML", 
+		LAST);
+	
+	
+lr_end_transaction("UC02_T1_passport_page", LR_AUTO);
+
+lr_start_transaction("UC02_T2_put_login");
+
+	
+	web_reg_save_param_ex(
+    "ParamName=track_id", 
+    "LB/IC=track_id\":\"",
+    "RB/IC=\"",
+	LAST);
+	
+	web_submit_data("start",
+		"Action={host}://{prefics}.{mailSecondPartFrom}/registration-validations/auth/multi_step/start",
+		"Method=POST",
+		"EncodeAtSign=YES",
+		"RecContentType=application/json",
+		"Referer=",
+		"Snapshot=t18.inf",
+		"Mode=HTML",
+		ITEMDATA,
+		"Name=csrf_token", "Value={csrf_token}", ENDITEM,
+		"Name=login", "Value={mailFirstPartFrom}@{mailSecondPartFrom}", ENDITEM,
+		"Name=process_uuid", "Value={process_uuid}", ENDITEM,
+		"Name=retpath", "Value={host}://{box}.{mailSecondPartFrom}/", ENDITEM,
+		"Name=origin", "Value=hostroot_homer_auth_ru", ENDITEM,
+		"Name=service", "Value={box}", ENDITEM,
+		LAST);
+		
+		lr_end_transaction("UC02_T2_put_login", LR_AUTO);
+		
+		lr_start_transaction("UC02_T3_put_password");
+	
+web_reg_save_param_ex(
+    "ParamName=sessguard", 
+    "LB/IC=sessguard=",
+    "RB/IC=;",
+	LAST);
+	
+	web_reg_save_param_ex(
+    "ParamName=Session_id", 
+    "LB/IC=Session_id=",
+    "RB/IC=;",
+	LAST);
+	
+	web_reg_save_param_ex(
+    "ParamName=sessionid2", 
+    "LB/IC=sessionid2=",
+    "RB/IC=;",
+	LAST);
+	web_submit_data("commit_password",
+		"Action={host}://{prefics}.{mailSecondPartFrom}/registration-validations/auth/multi_step/commit_password",
+		"Method=POST",
+		"RecContentType=application/json",
+		"Referer=",
+		"Snapshot=t25.inf",
+		"Mode=HTML",
+		ITEMDATA,
+		"Name=csrf_token", "Value={csrf_token}", ENDITEM,
+		"Name=track_id", "Value={track_id}", ENDITEM,
+		"Name=password", "Value={password}", ENDITEM,
+		"Name=retpath", "Value={host}://{box}.{mailSecondPartFrom}/", ENDITEM,
+
+		LAST);
+
+	lr_end_transaction("UC02_T3_put_password", LR_AUTO);
+	lr_start_transaction("UC02_T4_validations");
+
+
+web_add_cookie("sessguard={sessguard}; DOMAIN={prefics}.{mailSecondPartFrom}");
+web_add_cookie("Session_id={Session_id}; DOMAIN={prefics}.{mailSecondPartFrom}");
+web_add_cookie("sessionid2={sessionid2}; DOMAIN={prefics}.{mailSecondPartFrom}");
+
+web_reg_save_param_ex(
+    "ParamName=uid", 
+    "LB/IC=uid\":\"",
+    "RB/IC=\"",
+	LAST);
+	web_reg_save_param_ex(
+    "ParamName=csrf", 
+    "LB/IC=csrf\":\"",
+    "RB/IC=\"",
+	LAST);
+	web_reg_save_param_ex(
+    "ParamName=login", 
+    "LB/IC=login\":\"",
+    "RB/IC=\"",
+	LAST);
+
+web_submit_data("accounts",
+		"Action={host}://{prefics}.{mailSecondPartFrom}/registration-validations/auth/accounts",
+		"Method=POST",
+		"RecContentType=application/json",
+		"Referer={host}://{prefics}.{mailSecondPartFrom}/auth/welcome?from={box}&origin=hostroot_homer_auth_ru&retpath={host}%3A%2F%2F{box}.{mailSecondPartFrom}%2F&backpath={host}%3A%2F%2F{box}.{mailSecondPartFrom}%3Fnoretpath%3D1",
+		"Snapshot=t27.inf",
+		"Mode=HTML",
+		ITEMDATA,
+		"Name=csrf_token", "Value={csrf_token}", ENDITEM,
+		LAST);
+
+
+	
+	web_submit_data("ask_v2", 
+		"Action={host}://{prefics}.{mailSecondPartFrom}/registration-validations/auth/additional_data/ask_v2", 
+		"Method=POST", 
+		"RecContentType=application/json", 
+		"Referer={host}://{prefics}.{mailSecondPartFrom}/auth/welcome?from={box}&origin=hostroot_homer_auth_ru&retpath={host}%3A%2F%2F{box}.{mailSecondPartFrom}%2F&backpath={host}%3A%2F%2F{box}.{mailSecondPartFrom}%3Fnoretpath%3D1", 
+		"Snapshot=t28.inf", 
+		"Mode=HTML", 
+		ITEMDATA, 
+		"Name=csrf_token", "Value={csrf}", ENDITEM, 
+		"Name=uid", "Value={uid}", ENDITEM, 
+		LAST);
+		
+		lr_end_transaction("UC02_T4_validations", LR_AUTO);
+		
+lr_start_transaction("UC02_T5_go_to_mail");
+
+
+
+
+	web_add_cookie("yandex_login={mailSecondPartFrom}; DOMAIN={mailSecondPartFrom}");
+	
+	web_reg_save_param_ex(
+    "ParamName=LIZA", 
+    "LB/IC=reqid=",
+    "RB/IC=;",
+	LAST);
+	web_reg_save_param_ex(
+    "ParamName=ckey_2", 
+    "LB/IC=ckey\":\"",
+    "RB/IC=\"",
+	LAST);
+	
+	
+	web_url("redirect", 
+		"URL={host}://{prefics}.{mailSecondPartFrom}/redirect?url={host}%3A%2F%2F{box}.{mailSecondPartFrom}%2F", 
+		"Resource=0", 
+		"RecContentType=text/http", 
+		"Referer={host}://{prefics}.{mailSecondPartFrom}/", 
+		"Snapshot=t30.inf", 
+		"Mode=HTML", 
+		LAST);
+	
+
+	//вход в папку входящие//
+	
+	
+	lr_save_string(lr_eval_string("\{\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,30;134420,0,36;188836,0,3;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;287360,0,56;296576,0,78;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,"
+		"0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,30;134420,0,36;188836,0,3;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;296576,0,78;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.8.0\",\"_messages_per_page\":\"30\",\"_csw\":0,\"models\":[\{\"name\":\"folders\",\"params\":\{\},\"meta\":\{\"requestAttempt\":1\}\},\{\"name\":\"labels\",\""
+		"params\":\{\},\"meta\":\{\"requestAttempt\":1\}\},\{\"name\":\"messages\",\"params\":\{\"current_folder\":true,\"with_pins\":\"yes\",\"sort_type\":\"date\"\},\"meta\":\{\"requestAttempt\":1\}\}]\}"),"paramLiza");
+	
+	web_reg_save_param_json(
+        "ParamName=messageForAnswer",
+        "QueryString=$..message[?(@.subject=='Test 1' && @.new==1)].message_id",
+        "NotFound=warning",
+         "SelectAll=Yes",
+        LAST); 
+	
+	web_reg_save_param_json(
+        "ParamName=midForAnswer",
+        "QueryString=$..message[?(@.subject=='Test 1' && @.new==1)].mid",
+         "SelectAll=Yes",
+        LAST);
+	
+	
+	web_reg_save_param_json(
+        "ParamName=firstline",
+        "QueryString=$..message[?(@.subject=='Test 1' && @.new==1)].firstline",
+        "NotFound=warning",
+         "SelectAll=Yes",
+        LAST); 
+	web_reg_save_param_json(
+        "ParamName=messageRead",
+        "QueryString=$..message[?(@.subject!='Test 1' && @.new==1)].message_id",
+        "NotFound=warning",
+         "SelectAll=Yes",
+        LAST);
+	
+	web_reg_save_param_json(
+        "ParamName=midNoAnswer",
+        "QueryString=$..message[?(@.subject!='Test 1' && @.new==1)].mid",
+        "NotFound=warning",
+         "SelectAll=Yes",
+        LAST);
+	 	
+	 
+	web_custom_request("liza1",
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=folders,labels,messages", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t31.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={paramLiza}", 
+		LAST);
+	
+			
+	web_url("accounts_2", 
+		"URL={host}://api.{prefics}.{mailSecondPartFrom}/accounts", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t33.inf", 
+		"Mode=HTML", 
+		LAST);
+	
+	lr_end_transaction("UC02_T5_go_to_mail", LR_AUTO);
+
+	
+//	.........................................................................
+//	/////////////////////////// это кусок который читает все новые письма письма с темой не Test 1
+// .............................................................................	
+	if(atoi(lr_eval_string("{messageRead_count}")) !=0){
+		
+		
+
+	
+	lr_start_transaction("UC02_T6_read_all_mail");
+
+
+	
+		
+	
+	while(count<(atoi(lr_eval_string("{messageRead_count}")))){
+		count++;
+		lr_save_string (lr_paramarr_idx("midNoAnswer", count),"midNo");
+
+
+lr_save_string(lr_eval_string("\{\"models\":[{\"name\":\"folders\",\"params\":{},\"meta\":{\"requestAttempt\":1}},{\"name\":\"labels\",\"params\":{},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\","
+		"\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,30;134420,0,36;188836,0,3;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;287360,0,56;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,30;134420,0,36;188836,0,3;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.10.1\",\"_messages_per_page\""
+		":\"30\",\"_csw\":0}"),"param_11");
+		
+		lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"do-mail-reset-recent-counter\",\"params\":{},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,"
+                              "77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_23");
+		web_custom_request("liza1", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=do-{box}-reset-recent-counter", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t3.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_23}",
+		LAST);
+
+	web_add_cookie("app_badge_up_to_date_317418=1; DOMAIN={box}.{mailSecondPartFrom}");
+	
+	lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"app-badge-counter\",\"params\":{\"uid\":\"{uid}\"},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24"
+	                              ";262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_24");
+
+	web_custom_request("liza1_2", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=app-badge-counter", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t4.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_24}",
+		LAST);
+
+	
+lr_save_string(lr_eval_string("{\"messages\":\"[{\\\"scenario\\\":{\\\"id\\\":\\\"{LIZA}\\\",\\\"type\\\":\\\"message-view-scenario\\\",\\\"startTime\\\":1622906854012,\\\"finishTime\\\":1622906964972},\\\"params\\\":{\\\"sessionLifetime\\\":21759881,\\\"step\\\":\\\"finish\\\",\\\"finalizer\\\":\\\"close-and-open-another-message\\\"},\\\"reason\\\":\\\"scenario\\\"},{\\\"action\\\":\\\"show\\\",\\\"block\\\":\\\"left-col-rtb-1\\\",\\\"id\\\":\\\"N-I-92550-1747\\\",\\\"statId\\\":65,\\\"type\\\":\\\""
+		"common\\\",\\\"flow\\\":\\\"ads\\\",\\\"reason\\\":\\\"workflow\\\"},{\\\"action\\\":\\\"show\\\",\\\"block\\\":\\\"messages-direct\\\",\\\"id\\\":\\\"N-I-92550-1322\\\",\\\"statId\\\":70,\\\"type\\\":\\\"new\\\",\\\"flow\\\":\\\"ads\\\",\\\"reason\\\":\\\"workflow\\\"}]\",\"model\":\"do-client-log\",\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\""
+		":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911"
+		",0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_25");
+
+
+	web_custom_request("v1", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/journal/v1?_m=do-client-log", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t8.inf", 
+		"Mode=HTML", 
+		"EncType=text/plain;charset=UTF-8", 
+		"Body={param_25}",
+		LAST);
+
+	
+
+
+		
+		lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"message-body\",\"params\":{\"ids\":\"{midNo}\",\"is_spam\":\"false\",\"raw\":\"false\",\"frequency\":\"0\",\"draft\":\"false\"},\"meta\":{\"requestAttempt\":1}},{\"name\":\"message-nearest\",\"params\":{\"ids\":\"{midNo}\"},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\","
+		"\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,"
+		"77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_21");
+		
+	
+		web_custom_request("liza1_14", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=message-body,message-nearest", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t284.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_21}",
+		LAST);
+		
+		lr_save_string(lr_eval_string("{\"messages\":\"[{\\\"target\\\":\\\"message\\\",\\\"isSearch\\\":false,\\\"readingId\\\":\\\"{midNo}ca2b531a44\\\",\\\"mid\\\":\\\"{midNo}\\\",\\\"container_kind\\\":\\\"folder\\\",\\\"container_id\\\":\\\"1\\\",\\\"container_type\\\":\\\"inbox\\\",\\\"operation\\\":\\\"startReading\\\"}]\",\"model\":\"do-journal-log\",\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,"
+		"76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_22");
+		
+
+		
+		web_custom_request("v1_3", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/journal/v1?_m=do-journal-log", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t18.inf", 
+		"Mode=HTML", 
+		"EncType=text/plain;charset=UTF-8", 
+		"Body={param_22}",
+		LAST);
+
+	lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"do-messages\",\"params\":{\"ids\":\"{midNo}\",\"action\":\"mark\"},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;"
+		                              "354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_22");
+		
+	web_custom_request("liza1_15", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=do-messages", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t286.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_22}",
+		LAST);
+
+
+	
+		web_custom_request("liza1", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=do-{box}-reset-recent-counter", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t1.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={\"models\":[{\"name\":\"do-{box}-reset-recent-counter\",\"params\":{},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,"
+		"77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}", 
+		EXTRARES, 
+		"Url=/u2709/favicon/png/main-favicon/16/0.png", "Referer={host}://{box}.{mailSecondPartFrom}/", ENDITEM, 
+		LAST);
+		
+
+
+	}
+		
+lr_end_transaction("UC02_T6_read_all_mail", LR_AUTO);
+
+}
+
+//---------------------------------------------------------------------------------
+//читает все новые письма с темой Test 1 и отвечает на них. По какой то причине не работает если работает первый кусок
+// при не нулевом количестве пис
+//------------------------------------------------------------------------------------------------------------
+	
+	
+	
+	if(atoi(lr_eval_string("{messageForAnswer_count}"))!= 0){
+		
+	count = 0;		
+	lr_start_transaction("UC02_T7_read_all_mail");
+
+	
+	while(count<(atoi(lr_eval_string("{messageForAnswer_count}")))){
+		count++;
+		
+		lr_save_string (lr_paramarr_idx("midForAnswer", count),"midAnswer");
+		tmp = lr_paramarr_idx("messageForAnswer", count);
+		lr_save_string (lr_paramarr_idx("firstline", count),"line");
+		
+ lan = strlen(tmp)-1;
+for(i=0; i < lan; i++){
+			
+ 	if(i >0){
+ 		s = i-1;
+ 		txt[s] = *(tmp+i);
+ 	}
+ 	else {
+ 		*(tmp+i);
+ 	}		
+
+		}
+
+solution2(txt,"@","\%40","mailAnswer");
+
+
+
+
+lr_save_string(lr_eval_string("\{\"models\":[{\"name\":\"folders\",\"params\":{},\"meta\":{\"requestAttempt\":1}},{\"name\":\"labels\",\"params\":{},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\","
+		"\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,30;134420,0,36;188836,0,3;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;287360,0,56;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,30;134420,0,36;188836,0,3;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.10.1\",\"_messages_per_page\""
+		":\"30\",\"_csw\":0}"),"param_11");
+		
+		lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"do-mail-reset-recent-counter\",\"params\":{},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,"
+                              "77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_23");
+		web_custom_request("liza1", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=do-{box}-reset-recent-counter", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t3.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_23}",
+		LAST);
+
+	web_add_cookie("app_badge_up_to_date_317418=1; DOMAIN={box}.{mailSecondPartFrom}");
+	
+	lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"app-badge-counter\",\"params\":{\"uid\":\"{uid}\"},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24"
+	                              ";262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_24");
+
+	web_custom_request("liza1_2", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=app-badge-counter", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t4.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_24}",
+		LAST);
+
+	
+lr_save_string(lr_eval_string("{\"messages\":\"[{\\\"scenario\\\":{\\\"id\\\":\\\"{LIZA}\\\",\\\"type\\\":\\\"message-view-scenario\\\",\\\"startTime\\\":1622906854012,\\\"finishTime\\\":1622906964972},\\\"params\\\":{\\\"sessionLifetime\\\":21759881,\\\"step\\\":\\\"finish\\\",\\\"finalizer\\\":\\\"close-and-open-another-message\\\"},\\\"reason\\\":\\\"scenario\\\"},{\\\"action\\\":\\\"show\\\",\\\"block\\\":\\\"left-col-rtb-1\\\",\\\"id\\\":\\\"N-I-92550-1747\\\",\\\"statId\\\":65,\\\"type\\\":\\\""
+		"common\\\",\\\"flow\\\":\\\"ads\\\",\\\"reason\\\":\\\"workflow\\\"},{\\\"action\\\":\\\"show\\\",\\\"block\\\":\\\"messages-direct\\\",\\\"id\\\":\\\"N-I-92550-1322\\\",\\\"statId\\\":70,\\\"type\\\":\\\"new\\\",\\\"flow\\\":\\\"ads\\\",\\\"reason\\\":\\\"workflow\\\"}]\",\"model\":\"do-client-log\",\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\""
+		":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911"
+		",0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_25");
+
+
+	web_custom_request("v1", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/journal/v1?_m=do-client-log", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t8.inf", 
+		"Mode=HTML", 
+		"EncType=text/plain;charset=UTF-8", 
+		"Body={param_25}",
+		LAST);
+
+	
+
+
+		
+		lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"message-body\",\"params\":{\"ids\":\"{midAnswer}\",\"is_spam\":\"false\",\"raw\":\"false\",\"frequency\":\"0\",\"draft\":\"false\"},\"meta\":{\"requestAttempt\":1}},{\"name\":\"message-nearest\",\"params\":{\"ids\":\"{midAnswer}\"},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\","
+		"\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,"
+		"77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_21");
+		
+	
+		web_custom_request("liza1_14", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=message-body,message-nearest", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t284.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_21}",
+		LAST);
+		
+		lr_save_string(lr_eval_string("{\"messages\":\"[{\\\"target\\\":\\\"message\\\",\\\"isSearch\\\":false,\\\"readingId\\\":\\\"{midAnswer}ca2b531a44\\\",\\\"mid\\\":\\\"{midAnswer}\\\",\\\"container_kind\\\":\\\"folder\\\",\\\"container_id\\\":\\\"1\\\",\\\"container_type\\\":\\\"inbox\\\",\\\"operation\\\":\\\"startReading\\\"}]\",\"model\":\"do-journal-log\",\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,"
+		"76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_22");
+		
+
+		
+		web_custom_request("v1_3", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/journal/v1?_m=do-journal-log", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t18.inf", 
+		"Mode=HTML", 
+		"EncType=text/plain;charset=UTF-8", 
+		"Body={param_22}",
+		LAST);
+
+	lr_save_string(lr_eval_string("{\"models\":[{\"name\":\"do-messages\",\"params\":{\"ids\":\"{midAnswer}\",\"action\":\"mark\"},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;"
+		                              "354881,0,76;333119,0,94;149384,0,77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}"),"param_22");
+		
+	web_custom_request("liza1_15", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=do-messages", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t286.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_22}",
+		LAST);
+
+
+	
+		web_custom_request("liza1", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=do-{box}-reset-recent-counter", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t1.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={\"models\":[{\"name\":\"do-{box}-reset-recent-counter\",\"params\":{},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,"
+		"77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}", 
+		EXTRARES, 
+		"Url=/u2709/favicon/png/main-favicon/16/0.png", "Referer={host}://{box}.{mailSecondPartFrom}/", ENDITEM, 
+		LAST);
+		
+
+
+	
+		
+	web_custom_request("liza1_2", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=app-badge-counter", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t4.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={param_24}",
+		LAST);
+
+
+
+	
+		web_reg_save_param_ex(
+    "ParamName=message_id", 
+    "LB/IC=messageId\":\"\\u",
+    "RB/IC=\\u",
+	LAST);
+	web_custom_request("liza1_12", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=do-init-compose", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t220.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={\"models\":[{\"name\":\"do-init-compose\",\"params\":{},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,77;155721,0,24"
+		";262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}", 
+		LAST);
+	
+	web_url("92550", 
+		"URL=https://an.yandex.ru/meta/92550?uid={uid}&disabled-ad-type=undefined&imp-id=1749&target-ref=https%3A%2F%2Fmail.yandex.ru%2F%3Fuid%3D317418%23message%2F{midAnswer}&page-ref=https%3A%2F%2Fmail.yandex.ru%2F%3Fuid%3D317418&ad-session-id={midAnswer}&ss-skip-token-length=30&layout-config="
+		"%7B%22win_width%22%3A1536%2C%22win_height%22%3A754%2C%22pixel_ratio%22%3A1.25%2C%22bandwidth%22%3A10%2C%22w%22%3A276%2C%22h%22%3A0%2C%22width%22%3A276%2C%22height%22%3A844%2C%22visible%22%3A0%2C%22left%22%3A20%2C%22top%22%3A415%2C%22req_no%22%3A6%2C%22ad_no%22%3A13%7D&test-tag=307863402577933&partner-stat-id=195&tga-with-creatives=1&return-widget-settings=1&yaw_ver=14896&pcodever=14896&use-server-side-rendering=1&pcode-test-ids="
+		"363741%2C0%2C98%3B371425%2C0%2C65%3B367341%2C0%2C54%3B369240%2C0%2C25%3B351586%2C0%2C90%3B370721%2C0%2C16%3B371572%2C0%2C77&available-width=276&pcode-icookie=6044820741622967400&duid=MTYyMjk2NzQ2MTI0ODAxOTA0OQ%3D%3D&grab=dNCf0LjRgdGM0LzQviDCq1Rlc3QgMcK7IOKAlCDQndCw0YLQsNC70YzRjyDQk9GD0YHRjNC60L7QstCwIOKAlCDQr9C90LTQtdC60YEu0J_QvtGH0YLQsAo%3D", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer=https://mail.yandex.ru/", 
+		"Snapshot=t11.inf", 
+		"Mode=HTML", 
+		EXTRARES, 
+//		"Url=https://mc.yandex.ru/watch/92550?page-url=https%3A%2F%2Fmail.yandex.ru%2F%3Fuid%3D317418%23message%2F176203335420872022&page-ref=https%3A%2F%2Fmail.yandex.ru%2F%3Fuid%3D317418&charset=utf-8&cnt-class=1&ut=noindex&browser-info="
+//		"pv%3A1%3Aar%3A1%3Agdpr%3A13-0%3Avf%3A1bo6nxnn5zutxu65%3Afu%3A0%3Aen%3Autf-8%3Ala%3Aru-RU%3Av%3A551%3Acn%3A2%3Adp%3A1%3Als%3A452847601559%3Ahid%3A1038700152%3Az%3A180%3Ai%3A20210606155519%3Aet%3A1622984120%3Ac%3A1%3Arn%3A791341896%3Arqn%3A59%3Au%3A1622967461248019049%3Aw%3A1523x753%3As%3A1536x864x24%3Ask%3A1.25%3Acpf%3A1%3Aeu%3A0%3Ans%3A1622984075593%3Arqnl%3A1%3Aadb%3A2%3Ati%3A2%3Ast%3A1622984120%3At%3A%D0%9F%D0%B8%D1%81%D1%8C%D0%BC%D0%BE%20%C2%ABTest%201%C2%BB%20%E2%80%94%20%D0%9D%D0%B0%D1%82%D0%"
+//		"B0%D0%BB%D1%8C%D1%8F%20%D0%93%D1%83%D1%81%D1%8C%D0%BA%D0%BE%D0%B2%D0%B0%20%E2%80%94%20%D0%AF%D0%BD%D0%B4%D0%B5%D0%BA%D1%81.%D0%9F%D0%BE%D1%87%D1%82%D0%B0", "Referer=https://mail.yandex.ru/", ENDITEM, 
+		LAST);
+
+	
+tmp2 = lr_eval_string("{message_id}");
+
+lr_output_message("%s",tmp2);
+
+for(j=0; j < strlen(tmp2); j++){
+	txt2[j] = *(tmp2+j);
+	
+}
+
+
+solution2(txt2,"@","\%40","mail2");
+lr_output_message("%s",lr_eval_string("{mail2}"));
+
+
+	
+
+		web_custom_request("liza1_35", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/do-send/liza1?_send=true", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t141.inf", 
+		"Mode=HTML", 
+		"EncType=application/x-www-form-urlencoded; charset=UTF-8",
+	    "Body=att_ids=&bcc=&captcha_entered=&captcha_key=&cc=&charset=&confirm_limit=&current_folder=6&doit=&fid=&from_mailbox={mailFirstPartFrom}%40{mailSecondPartFrom}&from_name={nameFrom}&get_abook=&html=&idcs=&ign_overwrite=no&initial_cc=&initial_to=%22{nameTo}%22+%3C{mailFirstPartTo}%40{mailSecondPartTo}%3E&inreplyto=%3C{mailAnswer}%3E&mark_as=replied&mark_ids={midAnswer}&disk_att=&nosave=yes&nosend=&notify_on_send=&overwrite="
+	    "{midAnswer}&parts=&phone=&references=%3C{mail2}%3E%3C%3E+%3C{mailAnswer}%3E&remind_period=&retpath=&returl=yes&saveDraft=&save_symbol=draft&send=%3Cdiv%3E{topic}%3C%2Fdiv%3E%3Cdiv%3E%3Cbr%2F%3E%3C%2Fdiv%3E%3Cdiv%3E%3Cbr%2F%3E%3C%2Fdiv%3E%3Cdiv%3E03.06.2021%2C+21%3A32%2C+%26quot%3B{nameFrom}%26quot%3B+%26lt%3B{mailFirstPartFrom}%40{mailSecondPartFrom}%26gt%3B%3A%3C%2Fdiv%3E%3Cblockquote+type%3D%22cite%22%3E%3Cdiv%3E{line}%3C"
+		"%2Fdiv%3E%3Cdiv%3E%3Cbr+%2F%3E%3C%2Fdiv%3E%3Cdiv%3E%3Cbr+%2F%3E%3C%2Fdiv%3E%3Cdiv%3E03.06.2021%2C+17%3A39%2C+%22{nameTo}%22+%26lt%3B%3Ca+href%3D%22mailto%3A{mailFirstPartTo}%40{mailSecondPartTo}%22%3E{mailFirstPartTo}%40{mailSecondPartTo}%3C%2Fa%3E%26gt%3B%3A%3C%2Fdiv%3E%3Cblockquote%3E%3Cdiv%3E{topic}%3C%2Fdiv%3E%3Cdiv%3E%C2%A0%3C%2Fdiv%3E%3Cdiv%3E26.05.2021%2C+16%3A57%2C+%22+%22+%26lt%3B%3Ca+"
+		"href%3D%22mailto%3{mailFirstPartTo}%40{mailSecondPartTo}%22%3E{mailFirstPartTo}%40{mailSecondPartTo}%3C%2Fa%3E%26gt%3B%3A%3C%2Fdiv%3E%3Cblockquote%3E%3Cdiv%3E%3C%2Fdiv%3E%3C%2Fblockquote%3E%0D%0A%3C%2Fblockquote%3E%0D%0A%3C%2Fblockquote%3E&send_time=&store_fid=&store_name=&strict_charset=&style=&subj=Re%3A+Test+1&to=%22{nameFrom}%22+%3C{mailFirstPartFrom}%40{mailSecondPartFrom}%3E&ttype=html&where=&withUpdatedUndoAndDelayedErrorHandling=yes&from=%5Bobject+Object%5D&message_id=%3C{mail2}%3EE&collapsedMessage="
+		"true&_ckey={ckey_2}&_uid={uid}&_locale=ru&_timestamp={initTimestamp}&_product=RUS&_connection_id={LIZA}&_exp="
+		"311631%2C0%2C-1%3B335955%2C0%2C-1%3B339972%2C0%2C-1%3B330582%2C0%2C20%3B339006%2C0%2C14%3B261663%2C0%2C95%3B134419%2C0%2C99%3B188837%2C0%2C13%3B300740%2C0%2C70%3B136883%2C0%2C22%3B317929%2C0%2C76%3B140619%2C0%2C82%3B354874%2C0%2C47%3B354881%2C0%2C76%3B333119%2C0%2C94%3B149384%2C0%2C77%3B155721%2C0%2C24%3B262911%2C0%2C0%3B227599%2C0%2C21%3B332484%2C0%2C63%3B343047%2C0%2C96%3B286810%2C0%2C10%3B286809%2C0%2C76%3B182416%2C0%2C40%3B335665%2C0%2C32&_eexp="
+		"311631%2C0%2C-1%3B335955%2C0%2C-1%3B339972%2C0%2C-1%3B330582%2C0%2C20%3B339006%2C0%2C14%3B261663%2C0%2C95%3B134419%2C0%2C99%3B188837%2C0%2C13%3B300740%2C0%2C70%3B136883%2C0%2C22%3B317929%2C0%2C76%3B140619%2C0%2C82%3B354874%2C0%2C47%3B333119%2C0%2C94%3B149384%2C0%2C77%3B262911%2C0%2C0%3B227599%2C0%2C21%3B332484%2C0%2C63%3B286810%2C0%2C10%3B286809%2C0%2C76%3B182416%2C0%2C40&_service=LIZA&_version=25.12.0&_messages_per_page=30&_csw=0&current_time=1622789832", 
+		LAST);
+		
+		web_custom_request("liza1",
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=folders,labels,messages", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t31.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={paramLiza}", 
+		LAST);
+		
+
+
+
+	}
+		
+lr_end_transaction("UC02_T7_read_all_mail", LR_AUTO);
+	}
+	
+	lr_start_transaction("UC02_T9_logout");
+
+	
+		web_custom_request("liza1_94", 
+		"URL={host}://{box}.{mailSecondPartFrom}/web-api/models/liza1?_m=reset-unvisited", 
+		"Method=POST", 
+		"Resource=0", 
+		"RecContentType=application/json", 
+		"Referer={host}://{box}.{mailSecondPartFrom}/", 
+		"Snapshot=t322.inf", 
+		"Mode=HTML", 
+		"EncType=application/json; encoding=utf-8", 
+		"Body={\"models\":[{\"name\":\"reset-unvisited\",\"params\":{\"fid\":\"1\"},\"meta\":{\"requestAttempt\":1}}],\"_ckey\":\"{ckey_2}\",\"_uid\":\"{uid}\",\"_locale\":\"ru\",\"_timestamp\":{initTimestamp},\"_product\":\"RUS\",\"_connection_id\":\"{LIZA}\",\"_exp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;354881,0,76;333119,0,94;149384,0,"
+		"77;155721,0,24;262911,0,0;227599,0,21;332484,0,63;343047,0,96;286810,0,10;286809,0,76;182416,0,40;335665,0,32\",\"_eexp\":\"311631,0,-1;335955,0,-1;339972,0,-1;330582,0,20;339006,0,14;261663,0,95;134419,0,99;188837,0,13;300740,0,70;136883,0,22;317929,0,76;140619,0,82;354874,0,47;333119,0,94;149384,0,77;262911,0,0;227599,0,21;332484,0,63;286810,0,10;286809,0,76;182416,0,40\",\"_service\":\"LIZA\",\"_version\":\"25.12.0\",\"_messages_per_page\":\"30\",\"_csw\":0}", 
+		LAST);
+	
+	
+
+	lr_end_transaction("UC02_T9_logout", LR_AUTO);
+
+	
+	return 0;
+}
